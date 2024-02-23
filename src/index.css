@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #FFFFFF;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -33,6 +33,19 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: #1a1a1a;
+}
+
+h2 {
+  color: #d3d3d3;
+  font-size: medium;
+  line-height: 1.1;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+
+h4 {
+  color:#d3d3d3;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
 button {
@@ -65,4 +78,5 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  
 }
