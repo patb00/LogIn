@@ -36,18 +36,6 @@ h1 {
   color: #1a1a1a;
 }
 
-h2 {
-  color: #d3d3d3;
-  font-size: medium;
-  line-height: 1.1;
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
-}
-
-h4 {
-  color:#d3d3d3;
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
-}
-
 button {
   border-radius: 8px;
   border: 1px solid transparent;

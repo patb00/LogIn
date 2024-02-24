@@ -4,7 +4,7 @@ import {
  Routes,
  Route
 } from "react-router-dom";
-import "./index.css";
+import "./App.css";
 import LoginPage from './pages/LoginPage';
 import Signin from './pages/Signin';
 import { Container } from "@mui/material";
@@ -17,8 +17,8 @@ function App () {
     
     <BrowserRouter>
     <Routes>
-      <Route path="/login" element={<LoginPage />}/>
-      <Route path="/signin" element={<Signin />}/>
+      <Route path="/login" index element={<LoginPage />}/>
+      <Route path="/signin" index element={<Signin />}/>
     </Routes>
     </BrowserRouter>
 
