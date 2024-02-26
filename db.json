@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "name": "test",
+      "surname": "test",
+      "username": "test",
+      "password": "test"
+    },
+    {
+      "name": "test",
+      "surname": "test",
+      "username": "test1",
+      "password": "test1"
+    },
+    {
+      "name": "test2",
+      "surname": "test2",
+      "username": "test21",
+      "password": "test12"
+    }
+  ]
+}

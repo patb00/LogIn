@@ -7,16 +7,13 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = ({ label, inputRef }) => {
   return (
-    <TextField
+       <TextField
       fullWidth
       variant="outlined"
       margin="normal"
       style={{ marginBottom: '13px' }}
       label={label}
       inputRef={inputRef}
-      InputLabelProps={{
-        shrink: true,
-      }}
     />
   );
 };

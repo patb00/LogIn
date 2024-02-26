@@ -6,7 +6,7 @@ import React from "react";
 interface GumbProps {
   buttonText: string;
   variant: 'text' | 'outlined' | 'contained';
-  onClick: () => void; // Add onClick prop
+  onClick: () => void; 
 }
 
 const Gumb: React.FC<GumbProps> = ({ buttonText, variant, onClick }) => {
