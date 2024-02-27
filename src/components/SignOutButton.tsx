@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import React from "react";
-interface GumbProps {
+interface SignOutButtonProps {
   buttonText: string;
   variant: "text" | "outlined" | "contained";
   onClick: () => void;
@@ -11,10 +11,10 @@ interface GumbProps {
     | "success"
     | "error"
     | "info"
-    | "warning"; // Optional, add more colors as needed
+    | "warning";
 }
 
-const Gumb: React.FC<GumbProps> = ({
+const SignOutButton: React.FC<SignOutButtonProps> = ({
   buttonText,
   variant,
   onClick,
@@ -24,8 +24,7 @@ const Gumb: React.FC<GumbProps> = ({
     <Button
       variant={variant}
       color={color}
-      fullWidth
-      style={{ marginBottom: "10px" }}
+      style={{ marginLeft: "auto", marginBottom: "-5px" }}
       onClick={onClick}
     >
       {buttonText}
@@ -33,4 +32,4 @@ const Gumb: React.FC<GumbProps> = ({
   );
 };
 
-export default Gumb;
+export default SignOutButton;
