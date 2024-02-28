@@ -53,14 +53,32 @@ const LoginPage = () => {
 
   return (
     <Container>
-      <Typography variant="h2" color={"#141414"}>
+      <Typography sx={{ m: 2, color: "#242b46" }} variant="h2">
         Login to your account
+      </Typography>
+      <Typography
+        sx={{ m: 2 }}
+        variant="h6"
+        color={"#d3d3d3"}
+        fontFamily={"Arial"}
+      >
+        Login using social media
       </Typography>
       <SocialMedia />
       <InputField label="Username" inputRef={usernameRef} />
       <InputField label="Password" inputRef={passwordRef} type="password" />
-      <Gumb buttonText="Log In" variant="contained" onClick={handleLogin} />
-      <Gumb buttonText="Sign Up" variant="outlined" onClick={handleSignUp} />
+      <Gumb
+        buttonText="Log In"
+        variant="contained"
+        onClick={handleLogin}
+        sx={{ mb: 2 }}
+      />
+      <Gumb
+        buttonText="Sign Up"
+        variant="outlined"
+        onClick={handleSignUp}
+        sx={{ mb: 2 }}
+      />
       {error && <Typography color="error">{error}</Typography>}
       <SignInDialog
         open={isSignInDialogOpen}

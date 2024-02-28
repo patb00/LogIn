@@ -11,7 +11,17 @@ interface CheckboxProps {
 const CheckBoxComponent: React.FC<CheckboxProps> = ({ onChange, checked }) => {
   return (
     <div>
-      <Checkbox {...label} onChange={onChange} checked={checked} />
+      <Checkbox
+        {...label}
+        onChange={onChange}
+        checked={checked}
+        sx={{
+          color: "#242b46", // Boja boxa
+          "&.Mui-checked": {
+            color: "#242b46", // Boja kvacice
+          },
+        }}
+      />
     </div>
   );
 };

@@ -9,6 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 import SignOutButton from "../components/SignOutButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
+import SaveIcon from "@mui/icons-material/Save";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 interface Task {
   id: string;
@@ -122,48 +127,74 @@ function ToDoList() {
 
   return (
     <Container>
-      <Box display="flex" flexDirection="column" gap={2}>
-        <SignOutButton
-          variant="outlined"
-          buttonText="Odjava"
-          color="error"
-          onClick={natragFunkcija}
-        />
+      <Box display="flex" flexDirection="row" justifyContent={"flex-end"}>
         <SignOutButton
           variant="outlined"
           buttonText="Promijeni lozinku"
-          color="error"
+          icon={<ManageAccountsIcon />}
           onClick={changePassword}
+        />
+        <SignOutButton
+          variant="outlined"
+          buttonText="Odjava"
+          icon={<ExitToAppIcon />}
+          onClick={natragFunkcija}
         />
         <ChangePasswordDialog
           open={entered}
           onClose={handleClose}
           onPasswordChange={updatePassword}
           isNewPasswordEnabled={isNewPasswordEnabled}
+          username={username}
         />
       </Box>
-      <InputField label="Unesi aktivnost" inputRef={aktivnostRef} />
-      <Gumb
-        variant="contained"
-        buttonText="Dodaj aktivnost"
-        onClick={dodajAktivnost}
-      />
+      <Box display="flex" flexDirection="row">
+        <InputField label="Unesi aktivnost" inputRef={aktivnostRef} />
+        <Gumb
+          variant="contained"
+          onClick={dodajAktivnost}
+          icon={<AddIcon />}
+          sx={{
+            mt: 2,
+            ml: 2,
+            width: 10,
+            height: 55,
+            fontWeight: "bold",
+            fontSize: "25px",
+            borderRadius: "8px",
+          }}
+        />
+      </Box>
+
       <Box
         width={600}
         height={500}
-        sx={{ border: "2px solid grey", overflow: "auto", mb: 2 }}
+        sx={{ border: "2px solid #242b46", overflow: "auto", mb: 2 }}
       >
-        <Typography sx={{ m: 2 }} variant="h2" color={"#a9a9a9"}>
-          To do List
+        <Typography
+          sx={{ mb: 3, mt: 3 }}
+          variant="h3"
+          color={"#666973"}
+          fontFamily={"sans-serif"}
+        >
+          To do list
         </Typography>
-        {tasks.map((task) => (
-          <Box key={task.id} sx={{ display: "flex", alignItems: "center" }}>
+        {tasks.map((task, index) => (
+          <Box
+            key={task.id}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: index % 2 === 0 ? "#e0e0e0" : "A5A5A5", // Alternating colors
+            }}
+          >
             <Box sx={{ marginRight: 2, marginLeft: 2 }}>
               <Typography
                 variant="h6"
                 style={{
+                  fontFamily: "",
                   textDecoration: task.checked ? "line-through" : "none",
-                  color: task.checked ? "black" : "black",
+                  color: task.checked ? "#9e9e9e" : "black",
                 }}
               >
                 {task.title}
@@ -174,7 +205,8 @@ function ToDoList() {
               checked={task.checked}
             />
             <RemoveButton
-              buttonText="REMOVE"
+              buttonText=""
+              icon={<RemoveIcon />}
               variant="contained"
               onClick={() => izbrisiAktivnost(task.id)}
             />
@@ -183,8 +215,10 @@ function ToDoList() {
       </Box>
       <Gumb
         variant="contained"
-        buttonText="Spremi"
         onClick={spremiAktivnosti}
+        sx={{}}
+        buttonText="Spremi"
+        icon={<SaveIcon />} // Pass SaveIcon as the icon prop
       />
     </Container>
   );

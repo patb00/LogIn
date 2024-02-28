@@ -8,6 +8,7 @@ interface InputFieldProps {
   type?: "password" | "number" | "search";
   required?: boolean;
   disabled?: boolean;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -18,9 +19,27 @@ const InputField: React.FC<InputFieldProps> = ({
   type,
   required,
   disabled,
+  onChange,
 }) => {
   return (
     <TextField
+      sx={{
+        "& label.Mui-focused": {
+          color: "#242b46",
+        },
+        "& .MuiOutlinedInput-root": {
+          "& fieldset": {
+            borderColor: "#242b46",
+          },
+          "&:hover fieldset": {
+            borderColor: "#242b46",
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#242b46",
+          },
+          color: "#242b46",
+        },
+      }}
       fullWidth
       variant="outlined"
       margin="normal"
@@ -32,6 +51,7 @@ const InputField: React.FC<InputFieldProps> = ({
       type={type}
       required={required}
       disabled={disabled}
+      onChange={onChange}
     />
   );
 };

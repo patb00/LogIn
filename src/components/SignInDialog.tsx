@@ -66,8 +66,12 @@ const SignInDialog: React.FC<SignInDialogProps> = ({ open, onClose }) => {
         <InputField label="Password" inputRef={passwordRef} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-        <Button onClick={informacijeOsobe}>Sign In</Button>
+        <Button sx={{ color: "#242b46" }} onClick={onClose}>
+          Close
+        </Button>
+        <Button sx={{ color: "#242b46" }} onClick={informacijeOsobe}>
+          Sign In
+        </Button>
       </DialogActions>
       <SnackbarDialog open={entered} onClose={handleClose} />
     </Dialog>
