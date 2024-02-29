@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DataGrid,
   GridCellParams,
@@ -51,6 +51,8 @@ interface DataTableProps {
   sxObject?: object;
   color1?: string;
   color2?: string;
+  removeCheckboxes?: boolean;
+  menuItem: Array<object>;
 }
 
 function DataTable({
@@ -67,6 +69,8 @@ function DataTable({
   checkboxSelection = false,
   color1 = "selectedRow3",
   color2 = "selectedRow4",
+  removeCheckboxes,
+  menuItem,
 }: DataTableProps) {
   const [cellValue, setCellValue] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<unknown | null>(null);
@@ -74,6 +78,16 @@ function DataTable({
   const [filterModel, setFilterModel] = useState<GridFilterModel>({
     items: [],
   });
+
+  //----------------------------------
+
+  useEffect(() => {
+    if (removeCheckboxes) {
+      setSelectedRowIds([]);
+    }
+  }, [removeCheckboxes]);
+
+  //-------------------------------------
 
   const [alertInfoOpen, setAlertInfoOpen] = useState<{
     open: boolean;
@@ -154,20 +168,49 @@ function DataTable({
     ],
   };
 
+  // --------------------------------------------------
   const copyText = () => {
     navigator.clipboard
       .writeText(cellValue)
       .then(() => {
         console.log("Text copied to clipboard");
+        setAlertInfoOpen({
+          open: true,
+          message: `Kopirana vrijednost: ${cellValue}`,
+          severity: "success",
+          alerttitle: "Uspješno kopirano",
+        });
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);
+        setAlertInfoOpen({
+          open: true,
+          message: "Pogreška u kopiranju",
+          severity: "error",
+          alerttitle: "Pogreška",
+        });
       });
   };
 
   const onCellClick = (params: GridCellParams) => {
     setCellValue(params.value?.toString() || "");
   };
+
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (alertInfoOpen.open) {
+      const timer = setTimeout(() => {
+        setAlertInfoOpen((prevState) => ({
+          ...prevState,
+          open: false,
+        }));
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [alertInfoOpen.open]);
+
+  //-------------------------------------------------------------
 
   const allColumns = showStatusColumn ? [statusColumn, ...columns] : columns;
 
@@ -265,7 +308,7 @@ function DataTable({
             {alertInfoOpen.message}
           </Alert>
         )}
-        <ContextMenu copyText={copyText}>
+        <ContextMenu copyText={copyText} canCopy={true} menuItem={menuItem}>
           <DataGrid
             sx={sxObject}
             rows={rows}
@@ -289,6 +332,7 @@ function DataTable({
                 ? handleSelectionModelChange
                 : handleSelectionModelChange2
             }
+            rowSelectionModel={selectedRowIds}
             checkboxSelection={checkboxSelection}
             rowCount={rows.length}
             onCellDoubleClick={handleCellClick}

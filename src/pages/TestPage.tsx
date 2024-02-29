@@ -6,6 +6,11 @@ import Box from "@mui/material/Box";
 import ContextMenu from "../components/ContextMenu";
 import { useState } from "react";
 import { GridCellParams } from "@mui/x-data-grid";
+import Alert, { AlertColor } from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import { Button } from "@mui/material";
+import { useEffect } from "react";
+import OpenDialog from "../components/OpenDialog";
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 90 },
@@ -52,30 +57,137 @@ const rows = [
 ];
 
 function TestPage() {
+  const [open, setOpen] = useState(false);
   const [cellValue, setCellValue] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]); //State Selected Rows
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
+
+  const handleRowSelectionChange = (newSelectionModel) => {
+    setRowSelectionModel(newSelectionModel);
+    const selectedData = rows.filter((row) =>
+      newSelectionModel.includes(row.id)
+    );
+    setSelectedRows(selectedData);
+  };
 
   const copyText = () => {
     navigator.clipboard
       .writeText(cellValue)
       .then(() => {
         console.log("Text copied to clipboard");
+        setAlertInfoOpen({
+          open: true,
+          message: `Kopirana vrijednost: ${cellValue}`,
+          severity: "success",
+          alerttitle: "Uspješno kopirano",
+        });
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);
+        setAlertInfoOpen({
+          open: true,
+          message: "Pogreška u kopiranju",
+          severity: "error",
+          alerttitle: "Pogreška",
+        });
       });
   };
+
+  // Include your existing useEffect hook here for handling the automatic closing of the alert
 
   const onCellClick = (params: GridCellParams) => {
     setCellValue(params.value?.toString() || "");
   };
 
+  const [alertInfoOpen, setAlertInfoOpen] = useState<{
+    open: boolean;
+    message?: string;
+    severity?: AlertColor;
+    alerttitle?: string;
+  }>({ open: false, message: "" });
+
+  const handleCellClick = async (params: GridCellParams) => {
+    if (params.value !== null && params.value !== undefined) {
+      try {
+        const valueToCopy =
+          typeof params.value === "object"
+            ? JSON.stringify(params.value)
+            : params.value.toString();
+        await navigator.clipboard.writeText(valueToCopy);
+
+        setAlertInfoOpen({
+          open: true,
+          message: `Kopirana vrijednost: ${valueToCopy}`,
+          severity: "success",
+          alerttitle: "Uspješno kopirano",
+        });
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+        setAlertInfoOpen({
+          open: true,
+          message: "Pogreška u kopiranju",
+          severity: "error",
+          alerttitle: "Pogreška",
+        });
+      }
+    } else {
+      setAlertInfoOpen({
+        open: true,
+        message: "Prazno polje! ",
+        severity: "info",
+        alerttitle: "Info",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (alertInfoOpen.open) {
+      const timer = setTimeout(() => {
+        setAlertInfoOpen((prevState) => ({
+          ...prevState,
+          open: false,
+        }));
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [alertInfoOpen.open]);
+
+  const handleClose = () => {
+    setOpen(false);
+    setRowSelectionModel([]);
+    setSelectedRows([]);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const menuItems = [
+    {
+      label: "Delete",
+      onClick: () => console.log("Delete action"),
+      menuText: "Delete",
+    },
+  ];
+
   return (
-    <Box sx={{ height: 400, width: "100%" }}>
-      <ContextMenu copyText={copyText}>
+    <Box sx={{ height: "80vh", overflow: "auto" }}>
+      {alertInfoOpen.open && (
+        <Alert
+          severity={alertInfoOpen.severity}
+          onClose={() => setAlertInfoOpen({ open: false })}
+        >
+          <AlertTitle>{alertInfoOpen.alerttitle}</AlertTitle>
+          {alertInfoOpen.message}
+        </Alert>
+      )}
+
+      <ContextMenu copyText={copyText} canCopy={true} menuItem={menuItems}>
         <DataGrid
           rows={rows}
           columns={columns}
           onCellClick={onCellClick}
+          onCellDoubleClick={handleCellClick}
           initialState={{
             pagination: {
               paginationModel: {
@@ -86,8 +198,19 @@ function TestPage() {
           pageSizeOptions={[5]}
           checkboxSelection
           disableRowSelectionOnClick
+          onRowSelectionModelChange={handleRowSelectionChange}
+          rowSelectionModel={rowSelectionModel}
         />
       </ContextMenu>
+      <Button
+        variant="outlined"
+        color="primary"
+        sx={{ width: 50, height: 50, mt: 5 }}
+        onClick={handleClickOpen}
+      >
+        Open Dialog
+      </Button>
+      <OpenDialog open={open} onClose={handleClose} rowData={selectedRows[0]} />
     </Box>
   );
 }

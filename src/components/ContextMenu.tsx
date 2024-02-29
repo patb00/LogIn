@@ -1,9 +1,15 @@
-import { Menu, MenuItem } from "@mui/material";
-import React, { ReactNode, MouseEvent } from "react";
+import { Menu, MenuItem, Box } from "@mui/material";
+import { ReactNode, MouseEvent, useState } from "react";
 
 interface ContextMenuProps {
   children: ReactNode;
   copyText: () => void;
+  canCopy?: boolean;
+  menuItem: Array<{
+    label: string;
+    onClick: () => void;
+    menuText: string;
+  }>;
 }
 
 interface ContextMenuState {
@@ -11,10 +17,13 @@ interface ContextMenuState {
   mouseY: number;
 }
 
-export default function ContextMenu({ children, copyText }: ContextMenuProps) {
-  const [contextMenu, setContextMenu] = React.useState<ContextMenuState | null>(
-    null
-  );
+export default function ContextMenu({
+  children,
+  copyText,
+  canCopy = true,
+  menuItem,
+}: ContextMenuProps) {
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
   const handleContextMenu = (event: MouseEvent) => {
     event.preventDefault();
@@ -35,7 +44,7 @@ export default function ContextMenu({ children, copyText }: ContextMenuProps) {
   };
 
   return (
-    <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+    <Box onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
       {children}
       <Menu
         open={contextMenu !== null}
@@ -47,8 +56,15 @@ export default function ContextMenu({ children, copyText }: ContextMenuProps) {
             : undefined
         }
       >
-        <MenuItem onClick={handleCopy}>Copy</MenuItem>
+        {canCopy && <MenuItem onClick={handleCopy}>Copy</MenuItem>}
+        {menuItem
+          .filter((item) => item.label)
+          .map((item, index) => (
+            <MenuItem key={index} onClick={item.onClick}>
+              {item.menuText}
+            </MenuItem>
+          ))}
       </Menu>
-    </div>
+    </Box>
   );
 }

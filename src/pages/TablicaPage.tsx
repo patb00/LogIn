@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import CDDDSDataTable from "../components/CDDSDataTable";
 import Box from "@mui/material/Box";
 import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
+import { Button } from "@mui/material";
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 90 },
@@ -39,14 +40,47 @@ const rows = [
 ];
 
 const TablicaPage = () => {
+  const [firstName, setFirstName] = useState("");
+  const [clearSelectionCounter, setClearSelectionCounter] = useState(false);
+
+  const handleClearSelections = () => {
+    setClearSelectionCounter((prev) => !prev);
+  };
+
+  const handleRowClick = (selectedRow) => {
+    const row = selectedRow;
+    const firstName = row.firstName;
+    setFirstName(firstName);
+  };
+
+  const removeFirstName = () => {
+    setFirstName("");
+  };
+  console.log(firstName);
+
+  const menuItems = [
+    {
+      label: "Delete",
+      onClick: () => console.log("Delete action"),
+      menuText: "Test",
+    },
+  ];
+
   return (
     <Box>
       <CDDDSDataTable
         columns={columns}
         rows={rows}
-        onRowSelected={() => console.log("row selected")}
+        onRowSelected={handleRowClick}
+        onRowDeselected={removeFirstName}
         showStatusColumn={false}
+        checkboxSelection={true}
+        removeCheckboxes={clearSelectionCounter}
+        menuItem={menuItems}
       />
+      <Button onClick={handleClearSelections} variant="contained">
+        Clear Selection
+      </Button>
     </Box>
   );
 };
