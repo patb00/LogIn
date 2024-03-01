@@ -3,6 +3,7 @@ import {
   DataGrid,
   GridCellParams,
   GridColDef,
+  GridColumnMenuProps,
   GridFilterModel,
   GridRenderCellParams,
   GridValidRowModel,
@@ -53,6 +54,10 @@ interface DataTableProps {
   color2?: string;
   removeCheckboxes?: boolean;
   menuItem: Array<object>;
+  onColumnDoubleClick?: () => void;
+  slotsMenu?: {
+    columnMenu?: (props: GridColumnMenuProps) => React.ReactNode;
+  };
 }
 
 function DataTable({
@@ -71,6 +76,8 @@ function DataTable({
   color2 = "selectedRow4",
   removeCheckboxes,
   menuItem,
+  onColumnDoubleClick,
+  slotsMenu,
 }: DataTableProps) {
   const [cellValue, setCellValue] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<unknown | null>(null);
@@ -333,10 +340,12 @@ function DataTable({
                 : handleSelectionModelChange2
             }
             rowSelectionModel={selectedRowIds}
+            onColumnHeaderDoubleClick={onColumnDoubleClick}
             checkboxSelection={checkboxSelection}
             rowCount={rows.length}
             onCellDoubleClick={handleCellClick}
             onCellClick={onCellClick}
+            slotsMenu={slotsMenu}
             getRowClassName={(params) =>
               params.indexRelativeToCurrentPage % 2 === 0 ? color1 : color2
             }

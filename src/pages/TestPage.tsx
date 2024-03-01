@@ -1,6 +1,13 @@
 import React from "react";
 import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
-import { GridValueGetterParams } from "@mui/x-data-grid";
+import {
+  GridColumnMenuColumnsItem,
+  GridColumnMenuFilterItem,
+  GridColumnMenuItemProps,
+  GridColumnMenuProps,
+  GridColumnMenuSortItem,
+  GridValueGetterParams,
+} from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
 import ContextMenu from "../components/ContextMenu";
@@ -8,12 +15,12 @@ import { useState } from "react";
 import { GridCellParams } from "@mui/x-data-grid";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
-import { Button } from "@mui/material";
+import { Button, Divider, Stack } from "@mui/material";
 import { useEffect } from "react";
-import OpenDialog from "../components/OpenDialog";
+import DialogColumn from "../components/DialogColumn";
 
 const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 90 },
+  { field: "id", headerName: "ID", width: 90, editable: true },
   {
     field: "firstName",
     headerName: "First name",
@@ -49,25 +56,74 @@ const rows = [
   { id: 2, lastName: "Lannister", firstName: "Cersei", age: 31 },
   { id: 3, lastName: "Lannister", firstName: "Jaime", age: 31 },
   { id: 4, lastName: "Stark", firstName: "Arya", age: 11 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
 ];
 
-function TestPage() {
+function MenuCloseComponent(
+  props: GridColumnMenuItemProps & { onOpenDialog: () => void }
+) {
+  // Note the addition of onOpenDialog in the props
+  return (
+    <Button
+      color="primary"
+      onClick={() => {
+        props.onClick(); // This closes the menu
+        props.onOpenDialog(); // This opens the dialog
+      }}
+    >
+      Close Menu
+    </Button>
+  );
+}
+
+function CustomColumnMenu(
+  props: GridColumnMenuProps & { onOpenDialog: () => void }
+) {
+  // Added onOpenDialog here to pass it down
+  const logFieldAndHideMenu = () => {
+    console.log(`Selected field: ${props.colDef.field}`);
+  };
+
+  const itemProps = {
+    colDef: props.colDef,
+    onClick: logFieldAndHideMenu,
+    onOpenDialog: props.onOpenDialog, // Pass the onOpenDialog function through
+  };
+
+  return (
+    <>
+      <Stack px={0.5} py={0.5}>
+        <GridColumnMenuSortItem {...itemProps} />
+        {itemProps.colDef.field === "desk" ? (
+          <GridColumnMenuFilterItem {...itemProps} />
+        ) : null}
+      </Stack>
+      <Divider />
+      <Stack px={0.5} py={0.5}>
+        <GridColumnMenuColumnsItem {...itemProps} />
+        <MenuCloseComponent {...itemProps} />
+      </Stack>
+    </>
+  );
+}
+
+export default function TestPage() {
   const [open, setOpen] = useState(false);
   const [cellValue, setCellValue] = useState("");
-  const [selectedRows, setSelectedRows] = useState([]); //State Selected Rows
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
 
+  const [editableColumn, setEditableColumn] = useState<string | null>(null);
+  const [columnsConfig, setColumnsConfig] = useState<GridColDef[]>(columns);
+  const [editValue, setEditValue] = useState("");
+
+  const [selectedColumnName, setSelectedColumnName] = useState("");
+
   const handleRowSelectionChange = (newSelectionModel) => {
+    console.log("Row selection changed:", newSelectionModel); // Log the new selection model
     setRowSelectionModel(newSelectionModel);
     const selectedData = rows.filter((row) =>
       newSelectionModel.includes(row.id)
     );
-    setSelectedRows(selectedData);
+    console.log("Selected data based on new selection model:", selectedData); // Log the selected data
   };
 
   const copyText = () => {
@@ -92,8 +148,6 @@ function TestPage() {
         });
       });
   };
-
-  // Include your existing useEffect hook here for handling the automatic closing of the alert
 
   const onCellClick = (params: GridCellParams) => {
     setCellValue(params.value?.toString() || "");
@@ -155,11 +209,6 @@ function TestPage() {
   const handleClose = () => {
     setOpen(false);
     setRowSelectionModel([]);
-    setSelectedRows([]);
-  };
-
-  const handleClickOpen = () => {
-    setOpen(true);
   };
 
   const menuItems = [
@@ -169,6 +218,36 @@ function TestPage() {
       menuText: "Delete",
     },
   ];
+
+  const handleOpenDialog = () => {
+    setOpen(true);
+  };
+
+  const handleSelectColumnName = (columnName: string) => {
+    setSelectedColumnName(columnName); // Update state with the selected column name
+    setEditableColumn(columnName); // Also set the editableColumn to the selected column name
+    handleOpenDialog(); // Open the dialog
+  };
+
+  const applyEdit = () => {
+    console.log("Applying edit for column:", editableColumn); // Log which column is being edited
+    const newColumns = columnsConfig.map((col) => {
+      if (col.field === editableColumn) {
+        console.log(
+          "Updating column header name from:",
+          col.headerName,
+          "to:",
+          editValue
+        ); // Log the change
+        return { ...col, headerName: editValue };
+      }
+      return col;
+    });
+    setColumnsConfig(newColumns);
+    setEditableColumn(null);
+    setEditValue("");
+    console.log("Columns config after edit:", newColumns); // Log the new columns configuration
+  };
 
   return (
     <Box sx={{ height: "80vh", overflow: "auto" }}>
@@ -185,9 +264,17 @@ function TestPage() {
       <ContextMenu copyText={copyText} canCopy={true} menuItem={menuItems}>
         <DataGrid
           rows={rows}
-          columns={columns}
+          columns={columnsConfig}
           onCellClick={onCellClick}
           onCellDoubleClick={handleCellClick}
+          slots={{
+            columnMenu: (props) => (
+              <CustomColumnMenu
+                {...props}
+                onOpenDialog={() => handleSelectColumnName(props.colDef.field)}
+              />
+            ),
+          }}
           initialState={{
             pagination: {
               paginationModel: {
@@ -202,17 +289,13 @@ function TestPage() {
           rowSelectionModel={rowSelectionModel}
         />
       </ContextMenu>
-      <Button
-        variant="outlined"
-        color="primary"
-        sx={{ width: 50, height: 50, mt: 5 }}
-        onClick={handleClickOpen}
-      >
-        Open Dialog
-      </Button>
-      <OpenDialog open={open} onClose={handleClose} rowData={selectedRows[0]} />
+      <DialogColumn
+        open={open}
+        onClose={handleClose}
+        editValue={editValue}
+        setEditValue={setEditValue}
+        onClick={applyEdit} // Assuming this changes the state directly
+      />
     </Box>
   );
 }
-
-export default TestPage;

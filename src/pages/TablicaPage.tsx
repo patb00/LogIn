@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import CDDDSDataTable from "../components/CDDSDataTable";
 import Box from "@mui/material/Box";
 import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
-import { Button } from "@mui/material";
+import { Button, Divider, Stack, TextField } from "@mui/material";
+import {
+  GridColumnMenuColumnsItem,
+  GridColumnMenuFilterItem,
+  GridColumnMenuItemProps,
+  GridColumnMenuProps,
+  GridColumnMenuSortItem,
+} from "@mui/x-data-grid";
+import DialogColumn from "../components/DialogColumn";
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 90 },
@@ -39,9 +47,62 @@ const rows = [
   { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
 ];
 
-const TablicaPage = () => {
+function MenuCloseComponent(
+  props: GridColumnMenuItemProps & { onOpenDialog: () => void }
+) {
+  return (
+    <Button
+      color="primary"
+      onClick={() => {
+        props.onClick(); // This closes the menu
+        props.onOpenDialog(); // This opens the dialog
+      }}
+    >
+      Close Menu
+    </Button>
+  );
+}
+
+function CustomColumnMenu(
+  props: GridColumnMenuProps & { onOpenDialog: () => void }
+) {
+  // Added onOpenDialog here to pass it down
+  const logFieldAndHideMenu = () => {
+    console.log(`Selected field: ${props.colDef.field}`);
+  };
+
+  const itemProps = {
+    colDef: props.colDef,
+    onClick: logFieldAndHideMenu,
+    onOpenDialog: props.onOpenDialog, // Pass the onOpenDialog function through
+  };
+
+  return (
+    <React.Fragment>
+      <Stack px={0.5} py={0.5}>
+        <GridColumnMenuSortItem {...itemProps} />
+        {itemProps.colDef.field === "desk" ? (
+          <GridColumnMenuFilterItem {...itemProps} />
+        ) : null}
+      </Stack>
+      <Divider />
+      <Stack px={0.5} py={0.5}>
+        <GridColumnMenuColumnsItem {...itemProps} />
+        <MenuCloseComponent {...itemProps} />
+      </Stack>
+    </React.Fragment>
+  );
+}
+
+export default function TablicaPage() {
   const [firstName, setFirstName] = useState("");
   const [clearSelectionCounter, setClearSelectionCounter] = useState(false);
+  const [editableColumn, setEditableColumn] = useState<string | null>(null);
+  const [columnsConfig, setColumnsConfig] = useState<GridColDef[]>(columns);
+  const [editValue, setEditValue] = useState("");
+  const [selectedColumnName, setSelectedColumnName] = useState("");
+  const [open, setOpen] = useState(false);
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
 
   const handleClearSelections = () => {
     setClearSelectionCounter((prev) => !prev);
@@ -66,10 +127,72 @@ const TablicaPage = () => {
     },
   ];
 
+  const handleColumnHeaderDoubleClick = (param) => {
+    setEditableColumn(param.field);
+    const currentColumn = columnsConfig.find(
+      (col) => col.field === param.field
+    );
+    setEditValue(currentColumn?.headerName || "");
+  };
+
+  const applyEdit = () => {
+    console.log("Applying edit for column:", editableColumn); // Log which column is being edited
+    const newColumns = columnsConfig.map((col) => {
+      if (col.field === editableColumn) {
+        console.log(
+          "Updating column header name from:",
+          col.headerName,
+          "to:",
+          editValue
+        ); // Log the change
+        return { ...col, headerName: editValue };
+      }
+      return col;
+    });
+    setColumnsConfig(newColumns);
+    setEditableColumn(null);
+    setEditValue("");
+    console.log("Columns config after edit:", newColumns); // Log the new columns configuration
+  };
+
+  const handleEditChange = (event) => {
+    setEditValue(event.target.value);
+  };
+
+  const handleOpenDialog = () => {
+    setOpen(true);
+  };
+
+  const handleSelectColumnName = (columnName: string) => {
+    setSelectedColumnName(columnName); // Update state with the selected column name
+    setEditableColumn(columnName); // Also set the editableColumn to the selected column name
+    handleOpenDialog(); // Open the dialog
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setRowSelectionModel([]);
+  };
+
   return (
     <Box>
+      <Box>
+        <TextField
+          sx={{ height: 20, mb: 2 }}
+          value={editValue}
+          onChange={handleEditChange}
+        />
+        <Button
+          sx={{ m: 2, height: 30, width: 35 }}
+          variant="outlined"
+          onClick={applyEdit}
+        >
+          Change
+        </Button>
+      </Box>
+
       <CDDDSDataTable
-        columns={columns}
+        columns={columnsConfig}
         rows={rows}
         onRowSelected={handleRowClick}
         onRowDeselected={removeFirstName}
@@ -77,12 +200,26 @@ const TablicaPage = () => {
         checkboxSelection={true}
         removeCheckboxes={clearSelectionCounter}
         menuItem={menuItems}
+        onColumnDoubleClick={handleColumnHeaderDoubleClick}
+        slotsMenu={{
+          columnMenu: (props) => (
+            <CustomColumnMenu
+              {...props}
+              onOpenDialog={() => handleSelectColumnName(props.colDef.field)}
+            />
+          ),
+        }}
+      />
+      <DialogColumn
+        open={open}
+        onClose={handleClose}
+        editValue={editValue}
+        setEditValue={setEditValue}
+        onClick={applyEdit} // Assuming this changes the state directly
       />
       <Button onClick={handleClearSelections} variant="contained">
         Clear Selection
       </Button>
     </Box>
   );
-};
-
-export default TablicaPage;
+}
